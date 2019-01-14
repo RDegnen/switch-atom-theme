@@ -16,7 +16,7 @@ const (
 var (
 	current        string
 	curev          termbox.Event
-	options        selectOptions
+	options        selectionOptions
 	selectedOption string
 	atomConfigDir  = fmt.Sprintf("%s/.atom", os.Getenv("HOME"))
 )
@@ -56,39 +56,39 @@ func contains(s [2]string, e string) bool {
 	return false
 }
 
-type selectOptions struct {
+type selectionOptions struct {
 	data          []string
 	cursorBoffset int
 }
 
-func (dl *selectOptions) render() {
+func (so *selectionOptions) render() {
 	const coldef = termbox.ColorDefault
 	for i, s := range options.data {
 		tbprint(0, i+listOffset, coldef, coldef, s)
 	}
 }
 
-func (dl *selectOptions) moveCursor(boffset int) {
-	dl.cursorBoffset = boffset
+func (so *selectionOptions) moveCursor(boffset int) {
+	so.cursorBoffset = boffset
 	termbox.SetCursor(0, boffset)
 }
 
-func (dl *selectOptions) moveCursorUp() {
-	if dl.cursorBoffset == listOffset {
+func (so *selectionOptions) moveCursorUp() {
+	if so.cursorBoffset == listOffset {
 		return
 	}
-	dl.moveCursor(dl.cursorBoffset - 1)
+	so.moveCursor(so.cursorBoffset - 1)
 }
 
-func (dl *selectOptions) moveCursorDown() {
-	if dl.cursorBoffset == len(dl.data)+listOffset-1 {
+func (so *selectionOptions) moveCursorDown() {
+	if so.cursorBoffset == len(so.data)+listOffset-1 {
 		return
 	}
-	dl.moveCursor(dl.cursorBoffset + 1)
+	so.moveCursor(so.cursorBoffset + 1)
 }
 
-func (dl *selectOptions) selectOption() string {
-	value := dl.data[dl.cursorBoffset-listOffset]
+func (so *selectionOptions) selectOption() string {
+	value := so.data[so.cursorBoffset-listOffset]
 	return value
 }
 
