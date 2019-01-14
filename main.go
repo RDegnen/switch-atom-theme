@@ -3,13 +3,14 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/nsf/termbox-go"
 )
 
 const (
-	atomConfigDir = "/Users/ross/.atom"
+	listOffset = 2
 )
 
 var (
@@ -17,6 +18,7 @@ var (
 	curev          termbox.Event
 	options        selectOptions
 	selectedOption string
+	atomConfigDir  = fmt.Sprintf("%s/.atom", os.Getenv("HOME"))
 )
 
 func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
@@ -62,7 +64,7 @@ type selectOptions struct {
 func (dl *selectOptions) render() {
 	const coldef = termbox.ColorDefault
 	for i, s := range options.data {
-		tbprint(0, i+1, termbox.ColorCyan, coldef, s)
+		tbprint(0, i+listOffset, coldef, coldef, s)
 	}
 }
 
@@ -72,28 +74,28 @@ func (dl *selectOptions) moveCursor(boffset int) {
 }
 
 func (dl *selectOptions) moveCursorUp() {
-	if dl.cursorBoffset == 1 {
+	if dl.cursorBoffset == listOffset {
 		return
 	}
 	dl.moveCursor(dl.cursorBoffset - 1)
 }
 
 func (dl *selectOptions) moveCursorDown() {
-	if dl.cursorBoffset == len(dl.data) {
+	if dl.cursorBoffset == len(dl.data)+listOffset-1 {
 		return
 	}
 	dl.moveCursor(dl.cursorBoffset + 1)
 }
 
 func (dl *selectOptions) selectOption() string {
-	value := dl.data[dl.cursorBoffset-1]
+	value := dl.data[dl.cursorBoffset-listOffset]
 	return value
 }
 
 func redrawAll() {
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
-	tbprint(0, 0, termbox.ColorYellow, coldef, "Select a theme. Press 'ESC' to quit")
+	tbprint(0, 0, termbox.ColorCyan, coldef, "Select a theme. Press 'ESC' to quit, use arrows to navigate")
 	options.render()
 	termbox.Flush()
 }
@@ -129,7 +131,7 @@ func main() {
 		ui = append(ui, value)
 	}
 
-	options.cursorBoffset = 1
+	options.cursorBoffset = listOffset
 	options.data = syntax
 	termbox.SetCursor(0, options.cursorBoffset)
 
@@ -154,7 +156,6 @@ mainloop:
 				}
 				themeOffset = 1
 				options.data = ui
-
 			}
 		case termbox.EventError:
 			panic(ev.Err)
