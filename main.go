@@ -2,11 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"strings"
 
-	"github.com/nsf/termbox-go"
+	termbox "github.com/nsf/termbox-go"
 )
 
 const (
@@ -18,7 +15,6 @@ var (
 	curev          termbox.Event
 	options        selectionOptions
 	selectedOption string
-	atomConfigDir  = fmt.Sprintf("%s/.atom", os.Getenv("HOME"))
 )
 
 func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
@@ -26,34 +22,6 @@ func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
 		termbox.SetCell(x, y, c, fg, bg)
 		x++
 	}
-}
-
-func changeAtomConfig(value string, themeOffset int) {
-	file, err := ioutil.ReadFile(fmt.Sprintf("%s/config.cson", atomConfigDir))
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	lines := strings.Split(string(file), "\n")
-	for i, line := range lines {
-		if strings.Contains(line, "theme") {
-			lines[i+themeOffset] = fmt.Sprintf(`      "%s"`, value)
-		}
-	}
-	output := strings.Join(lines, "\n")
-	err = ioutil.WriteFile(fmt.Sprintf("%s/config.cson", atomConfigDir), []byte(output), 0644)
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
-func contains(s [2]string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
 
 func redrawAll() {
@@ -64,6 +32,15 @@ func redrawAll() {
 	termbox.Flush()
 }
 
+func selectEditor(value string) {
+	switch value {
+	case "atom":
+		atom()
+	case "vscode":
+		fmt.Println("Yay")
+	}
+}
+
 func main() {
 	err := termbox.Init()
 	if err != nil {
@@ -72,36 +49,12 @@ func main() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc)
 
-	files, err := ioutil.ReadDir(fmt.Sprintf("%s/packages", atomConfigDir))
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	syntax := make([]string, 0, len(files))
-	ui := make([]string, 0, len(files))
-	builtInUI := [4]string{"atom-dark-ui", "atom-light-ui", "one-dark-ui", "one-light-ui"}
-	UIToIgnore := [2]string{"atom-ide-ui", "linter-ui-default"}
-
-	for _, f := range files {
-		if strings.Contains(f.Name(), "syntax") {
-			syntax = append(syntax, f.Name())
-		}
-		if strings.Contains(f.Name(), "ui") && !contains(UIToIgnore, f.Name()) {
-			ui = append(ui, f.Name())
-		}
-	}
-
-	for _, value := range builtInUI {
-		ui = append(ui, value)
-	}
-
 	options.cursorBoffset = listOffset
-	options.data = syntax
+	options.data = []string{"vscode", "atom"}
 	termbox.SetCursor(0, options.cursorBoffset)
 
 	redrawAll()
 
-	themeOffset := 2
 mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -114,12 +67,8 @@ mainloop:
 			case termbox.KeyArrowDown:
 				options.moveCursorDown()
 			case termbox.KeyEnter:
-				changeAtomConfig(options.selectOption(), themeOffset)
-				if themeOffset == 1 {
-					break mainloop
-				}
-				themeOffset = 1
-				options.data = ui
+				selectEditor(options.selectOption())
+				break mainloop
 			}
 		case termbox.EventError:
 			panic(ev.Err)
