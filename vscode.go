@@ -22,11 +22,6 @@ type theme struct {
 	Label string
 }
 
-var (
-	vscodeInstalledExtensions = fmt.Sprintf("%s/.vscode/extensions", os.Getenv("HOME"))
-	vscodeDefaultExtensions   = "/Applications/Visual Studio Code.app/Contents/Resources/app/extensions"
-)
-
 func getThemeDirectories(inPath string) []string {
 	files, err := filepath.Glob(fmt.Sprintf("%s/*theme*/package.json", inPath))
 	if err != nil {
@@ -77,7 +72,38 @@ func extractLabels(blobs []themeBlob) []string {
 	return labels
 }
 
+// FIXME default themes use id instead of label field
+func changeVscodeSettings(theme string, filepath string) map[string]interface{} {
+	var settings interface{}
+	data, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if err := json.Unmarshal(data, &settings); err != nil {
+		fmt.Println(err)
+	}
+
+	settingsMap := settings.(map[string]interface{})
+	settingsMap["workbench.colorTheme"] = theme
+	return settingsMap
+}
+
+func mutateVscodeSettingsFile(newSettings map[string]interface{}, filePath string) {
+	data, err := json.Marshal(newSettings)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if err := ioutil.WriteFile(filePath, data, 0644); err != nil {
+		fmt.Println(err)
+	}
+}
+
 func vscode() {
+	vscodeInstalledExtensions := fmt.Sprintf("%s/.vscode/extensions", os.Getenv("HOME"))
+	vscodeDefaultExtensions := "/Applications/Visual Studio Code.app/Contents/Resources/app/extensions"
+	vscodeSettingsFile := fmt.Sprintf("%s/Library/Application Support/Code/User/settings.json", os.Getenv("HOME"))
 	packageFiles :=
 		flattenString(
 			[][]string{
@@ -108,6 +134,8 @@ vscodeloop:
 			case termbox.KeyArrowDown:
 				options.moveCursorDown()
 			case termbox.KeyEnter:
+				newSettings := changeVscodeSettings(options.selectOption(), vscodeSettingsFile)
+				mutateVscodeSettingsFile(newSettings, vscodeSettingsFile)
 				break vscodeloop
 			}
 		case termbox.EventError:
