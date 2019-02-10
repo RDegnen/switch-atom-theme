@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	termbox "github.com/nsf/termbox-go"
 )
 
@@ -37,7 +35,7 @@ func selectEditor(value string) {
 	case "atom":
 		atom()
 	case "vscode":
-		fmt.Println("Yay")
+		vscode()
 	}
 }
 
