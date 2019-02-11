@@ -80,7 +80,6 @@ func extractLabels(blobs []themeBlob) []string {
 	return labels
 }
 
-// FIXME default themes use id instead of label field
 func changeVscodeSettings(theme string, filepath string) map[string]interface{} {
 	var settings interface{}
 	data, err := ioutil.ReadFile(filepath)

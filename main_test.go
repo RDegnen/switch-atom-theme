@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -63,6 +64,33 @@ func TestMutateVscodeSettingsFile(t *testing.T) {
 
 	if !reflect.DeepEqual(recievedJSON, expectedJSON) {
 		t.Errorf("Incorrect mutation of vscode test file,\n expected %s,\n to equal %s", recievedJSON, expectedJSON)
+	}
+
+	os.Remove(newFilePath)
+}
+
+func TestMutateAtomConfigFile(t *testing.T) {
+	var syntax string
+	themeOffset := 2
+	oldFilePath := "./test_files/atom_config.cson"
+	newFilePath := "./test_files/new_atom_config.cson"
+	data := changeAtomConfig("new-syntax", themeOffset, oldFilePath)
+
+	mutateAtomConfigFile(newFilePath, data)
+	file, err := ioutil.ReadFile(newFilePath)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	lines := strings.Split(string(file), "\n")
+	for i, line := range lines {
+		if strings.Contains(line, "theme") {
+			syntax = lines[i+themeOffset]
+		}
+	}
+
+	if syntax != `      "new-syntax"` {
+		t.Errorf("Incorrect Atom theme, got %s, expected '      new-syntax'", syntax)
 	}
 
 	os.Remove(newFilePath)

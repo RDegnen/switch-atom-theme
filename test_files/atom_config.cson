@@ -1,0 +1,47 @@
+"*":
+  "atom-beautify":
+    general:
+      _analyticsUserId: "f34ebb2f-00c7-4a5b-aabd-42f3809ef43a"
+  "atom-ide-ui":
+    "atom-ide-code-format":
+      formatOnSave: true
+  "atom-material-ui":
+    colors:
+      abaseColor: "#90b249"
+    tabs: {}
+    treeView: {}
+    ui:
+      panelContrast: true
+      panelShadows: true
+  core:
+    disabledPackages: [
+      "language-gfm"
+      "linter-rubocop"
+      "linter-scss-lint"
+      "react"
+      "linter-jshint"
+      "linter"
+    ]
+    telemetryConsent: "limited"
+    themes: [
+      "test-atom-ui"
+      "test-atom-syntax"
+    ]
+  editor:
+    fontSize: 13
+    scrollPastEnd: true
+  "exception-reporting":
+    userId: "6aa082fd-91a1-4240-b9e5-c65386879318"
+  "linter-python":
+    executablePath: "/usr/local/bin/pylama"
+    withMcCabe: true
+    withPep257: true
+    withPyflakes: true
+    withPylint: true
+  "linter-ui-default":
+    showPanel: true
+  welcome:
+    showOnStartup: false
+  zentabs:
+    maximumOpenedTabs: 4
+    neverCloseUnsaved: true

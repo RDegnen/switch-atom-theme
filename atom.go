@@ -9,10 +9,6 @@ import (
 	termbox "github.com/nsf/termbox-go"
 )
 
-var (
-	atomConfigDir = fmt.Sprintf("%s/.atom", os.Getenv("HOME"))
-)
-
 func contains(s [2]string, e string) bool {
 	for _, a := range s {
 		if a == e {
@@ -22,8 +18,8 @@ func contains(s [2]string, e string) bool {
 	return false
 }
 
-func changeAtomConfig(value string, themeOffset int) {
-	file, err := ioutil.ReadFile(fmt.Sprintf("%s/config.cson", atomConfigDir))
+func changeAtomConfig(value string, themeOffset int, filePath string) string {
+	file, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -34,14 +30,18 @@ func changeAtomConfig(value string, themeOffset int) {
 			lines[i+themeOffset] = fmt.Sprintf(`      "%s"`, value)
 		}
 	}
-	output := strings.Join(lines, "\n")
-	err = ioutil.WriteFile(fmt.Sprintf("%s/config.cson", atomConfigDir), []byte(output), 0644)
-	if err != nil {
+	return strings.Join(lines, "\n")
+}
+
+func mutateAtomConfigFile(filePath string, data string) {
+	if err := ioutil.WriteFile(filePath, []byte(data), 0644); err != nil {
 		fmt.Println(err)
 	}
 }
 
 func atom() {
+	atomConfigDir := fmt.Sprintf("%s/.atom", os.Getenv("HOME"))
+	configFile := fmt.Sprintf("%s/config.cson", atomConfigDir)
 	files, err := ioutil.ReadDir(fmt.Sprintf("%s/packages", atomConfigDir))
 	if err != nil {
 		fmt.Println(err)
@@ -66,10 +66,10 @@ func atom() {
 	}
 
 	options.data = syntax
+	themeOffset := 2
 
 	redrawAll()
 
-	themeOffset := 2
 atomloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -82,7 +82,8 @@ atomloop:
 			case termbox.KeyArrowDown:
 				options.moveCursorDown()
 			case termbox.KeyEnter:
-				changeAtomConfig(options.selectOption(), themeOffset)
+				data := changeAtomConfig(options.selectOption(), themeOffset, configFile)
+				mutateAtomConfigFile(configFile, data)
 				if themeOffset == 1 {
 					break atomloop
 				}
