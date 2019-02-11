@@ -19,6 +19,7 @@ type contributions struct {
 }
 
 type theme struct {
+	ID    string
 	Label string
 }
 
@@ -62,11 +63,18 @@ func extractThemeBlob(filePath string) themeBlob {
 	return blob
 }
 
+func idOrLabel(t theme) string {
+	if t.ID != "" {
+		return t.ID
+	}
+	return t.Label
+}
+
 func extractLabels(blobs []themeBlob) []string {
 	labels := make([]string, 0, len(blobs))
 	for i := range blobs {
 		for _, v := range blobs[i].Contributes.Themes {
-			labels = append(labels, v.Label)
+			labels = append(labels, idOrLabel(v))
 		}
 	}
 	return labels

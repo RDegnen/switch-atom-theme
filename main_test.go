@@ -18,11 +18,11 @@ func TestExtractThemeBlob(t *testing.T) {
 }
 
 func TestExtractLabels(t *testing.T) {
-	testTheme1 := theme{"Theme One"}
+	testTheme1 := theme{ID: "Theme One", Label: "Theme One"}
 	testContributions1 := contributions{[]theme{testTheme1}}
 	testThemeBlob1 := themeBlob{testContributions1}
 
-	testTheme2 := theme{"Theme Two"}
+	testTheme2 := theme{ID: "Theme Two", Label: "Theme Two"}
 	testContributions2 := contributions{[]theme{testTheme2}}
 	testThemeBlob2 := themeBlob{testContributions2}
 
