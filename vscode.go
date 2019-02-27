@@ -24,7 +24,7 @@ type theme struct {
 }
 
 func getThemeDirectories(inPath string) []string {
-	files, err := filepath.Glob(fmt.Sprintf("%s/*theme*/package.json", inPath))
+	files, err := filepath.Glob(fmt.Sprintf("%s/*/package.json", inPath))
 	if err != nil {
 		fmt.Println(err)
 	}
